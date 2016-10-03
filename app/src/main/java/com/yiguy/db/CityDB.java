@@ -31,7 +31,7 @@ public class CityDB {
             String number = c.getString(c.getColumnIndex("number"));
             String allPY = c.getString(c.getColumnIndex("allpy"));
             String allFristPY = c.getString(c.getColumnIndex("allfirstpy"));
-            String firstPY = c.getString(c.getColumnIndex("firstyp"));
+            String firstPY = c.getString(c.getColumnIndex("firstpy"));
             City item = new City(province, city, number, firstPY, allPY, allFristPY);
             list.add(item);
         }
