@@ -76,7 +76,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         if (view.getId() == R.id.title_update_btn) {
             SharedPreferences sharedPreferences = getSharedPreferences("config", MODE_PRIVATE);
             String cityCode = sharedPreferences.getString("main_city_code", "101010100");
-            //String cityCode = sharedPreferences.getString("main_city_code", "101150804");
+           // String cityCode = sharedPreferences.getString("main_city_code", "101080101");
             Log.d("myWeather", cityCode);
 
             if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
@@ -288,6 +288,53 @@ public class MainActivity extends Activity implements View.OnClickListener {
         temperatureTv.setText(low + "°C~" + high + "°C");
         climateTv.setText(todayWeather.getType());
         windTv.setText("风力：" + todayWeather.getFengli());
+
+        //更新PM2.5图片
+        String pm25 = todayWeather.getPm25();
+        double pmData = Double.parseDouble(pm25);
+        if(pmData>=0 && pmData<=50){
+            pmImg.setImageResource(R.drawable.biz_plugin_weather_0_50);
+        } else if(pmData>50 && pmData<=100) {
+            pmImg.setImageResource(R.drawable.biz_plugin_weather_51_100);
+        } else if(pmData>100 && pmData<=150){
+            pmImg.setImageResource(R.drawable.biz_plugin_weather_101_150);
+        } else if(pmData>150 && pmData<=200){
+            pmImg.setImageResource(R.drawable.biz_plugin_weather_151_200);
+        } else if(pmData>200 && pmData<=300){
+            pmImg.setImageResource(R.drawable.biz_plugin_weather_201_300);
+        } else if(pmData>300){
+            pmImg.setImageResource(R.drawable.biz_plugin_weather_greater_300);
+        }
+
+        //更新天气情况图片
+        String type = todayWeather.getType();
+        if(type.equals("晴")){
+            weatherImg.setImageResource(R.drawable.biz_plugin_weather_qing);
+        } else if(type.equals("暴雪")){
+            weatherImg.setImageResource(R.drawable.biz_plugin_weather_baoxue);
+        } else if(type.equals("暴雨")){
+            weatherImg.setImageResource(R.drawable.biz_plugin_weather_baoyu);
+        } else if(type.equals("雾")){
+            weatherImg.setImageResource(R.drawable.biz_plugin_weather_wu);
+        } else if(type.equals("小雪")){
+            weatherImg.setImageResource(R.drawable.biz_plugin_weather_xiaoxue);
+        } else if(type.equals("小雨")){
+            weatherImg.setImageResource(R.drawable.biz_plugin_weather_xiaoyu);
+        } else if(type.equals("阴")){
+            weatherImg.setImageResource(R.drawable.biz_plugin_weather_yin);
+        } else if(type.equals("雨夹雪")){
+            weatherImg.setImageResource(R.drawable.biz_plugin_weather_yujiaxue);
+        } else if(type.equals("阵雪")){
+            weatherImg.setImageResource(R.drawable.biz_plugin_weather_zhenxue);
+        } else if(type.equals("阵雨")){
+            weatherImg.setImageResource(R.drawable.biz_plugin_weather_zhenxue);
+        } else if(type.equals("中雪")){
+            weatherImg.setImageResource(R.drawable.biz_plugin_weather_zhongxue);
+        } else if(type.equals("中雨")){
+            weatherImg.setImageResource(R.drawable.biz_plugin_weather_zhongyu);
+        } else if(type.equals("多云")){
+            weatherImg.setImageResource(R.drawable.biz_plugin_weather_duoyun);
+        }
         Toast.makeText(MainActivity.this, "更新成功！", Toast.LENGTH_SHORT).show();
     }
 }
