@@ -8,7 +8,6 @@ import com.yiguy.bean.City;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.SimpleTimeZone;
 
 /**
  * Created by Xiaoyi on 2016/10/3.
