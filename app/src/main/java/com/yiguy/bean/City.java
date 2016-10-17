@@ -3,6 +3,7 @@ package com.yiguy.bean;
 /**
  * Created by Xiaoyi on 2016/10/3.
  */
+
 public class City {
     private String province;
     private String city;
