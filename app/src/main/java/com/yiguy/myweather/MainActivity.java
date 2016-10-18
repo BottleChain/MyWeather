@@ -270,6 +270,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
         currentTemperatureTv = (TextView) findViewById(R.id.currentTemperature);
         weatherImg = (ImageView) findViewById(R.id.weather_img);
 
+
+
         city_nameTv.setText("N/A");
         cityTv.setText("N/A");
         timeTv.setText("N/A");
@@ -281,6 +283,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
         climateTv.setText("N/A");
         windTv.setText("N/A");
         currentTemperatureTv.setText("N/A");
+
+        String initCityCode = "101010100";
+        queryWeather(initCityCode);
     }
 
     /**
