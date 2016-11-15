@@ -1,9 +1,11 @@
 package com.yiguy.bean;
 
+import java.io.Serializable;
+
 /**
  * Created by Xiaoyi on 2016/10/3.
  */
-public class TodayWeather {
+public class TodayWeather implements Serializable {
     private String city;
     private String updatetime;
     private String wendu;

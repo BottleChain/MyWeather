@@ -31,7 +31,20 @@
             android:layout_toRightOf="@+id/title_back"
             android:background="#A71717"
             android:gravity="center"/>
+    </RelativeLayout>
 
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_marginTop="45.0dip" >
+
+        <ListView
+            android:id="@+id/lvCity"
+            android:listSelector="@drawable/list_item_bg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:cacheColorHint="@android:color/transparent">
+        </ListView>
     </RelativeLayout>
 
 

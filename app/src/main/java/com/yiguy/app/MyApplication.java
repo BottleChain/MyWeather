@@ -19,9 +19,14 @@ import java.util.List;
  */
 public class MyApplication extends Application {
     private static final String TAG = "MyAPP";
+    private static final String LOG_TAG = "myWeather";
     private static MyApplication mApplication;
     private CityDB mCityDB;
     private List<City> mCityList;
+
+    public static String getLogTag() {
+        return LOG_TAG;
+    }
 
     @Override
     public void onCreate() {
@@ -49,9 +54,8 @@ public class MyApplication extends Application {
             i++;
             String cityName = city.getCity();
             String cityCode = city.getNumber();
-            Log.d(TAG, cityCode+":" + cityName);
         }
-        Log.d(TAG, "i=" + i);
+        Log.d(TAG, "城市数量：i=" + i);
         return true;
     }
 
