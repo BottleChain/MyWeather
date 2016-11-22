@@ -24,10 +24,6 @@
         <service
             android:name="com.yiguy.service.UpdateService"
             android:exported="false" />
-        <service
-            android:name="com.yiguy.service.MyService"
-            android:enabled="true"
-            android:exported="true"></service>
     </application>
 
 </manifest>

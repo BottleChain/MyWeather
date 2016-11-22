@@ -1,8 +1,5 @@
 package com.yiguy.util;
 
-import android.os.Message;
-import android.util.Log;
-
 import com.yiguy.bean.TodayWeather;
 
 import org.xmlpull.v1.XmlPullParser;

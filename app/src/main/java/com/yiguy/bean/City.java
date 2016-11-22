@@ -5,6 +5,7 @@ package com.yiguy.bean;
  */
 
 public class City {
+
     private String province;
     private String city;
     private String number;
