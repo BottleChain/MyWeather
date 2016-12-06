@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="fill_parent"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/txtWeek4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="星期五"
+            android:textColor="@android:color/white"
+            android:textSize="20sp"
+            android:layout_gravity="center_horizontal"/>
+
+        <ImageView
+            android:id="@+id/imgWeather4"
+            android:layout_width="55dip"
+            android:layout_height="55dip"
+            android:layout_gravity="center_horizontal"
+            android:src="@drawable/biz_plugin_weather_duoyun"/>
+
+        <TextView
+            android:id="@+id/txtTemperature4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="10~15°C"
+            android:textColor="@android:color/white"
+            android:layout_gravity="center_horizontal"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/txtWeather4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="多云"
+            android:textColor="@android:color/white"
+            android:layout_gravity="center_horizontal"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/txtFeng4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="微风"
+            android:textColor="@android:color/white"
+            android:layout_gravity="center_horizontal"
+            android:textSize="20sp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="fill_parent"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/txtWeek5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="星期五"
+            android:textColor="@android:color/white"
+            android:textSize="20sp"
+            android:layout_gravity="center_horizontal"/>
+
+        <ImageView
+            android:id="@+id/imgWeather5"
+            android:layout_width="55dip"
+            android:layout_height="55dip"
+            android:layout_gravity="center_horizontal"
+            android:src="@drawable/biz_plugin_weather_duoyun"/>
+
+        <TextView
+            android:id="@+id/txtTemperature5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="10~15°C"
+            android:textColor="@android:color/white"
+            android:layout_gravity="center_horizontal"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/txtWeather5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="多云"
+            android:textColor="@android:color/white"
+            android:layout_gravity="center_horizontal"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/txtFeng5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="微风"
+            android:textColor="@android:color/white"
+            android:layout_gravity="center_horizontal"
+            android:textSize="20sp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="fill_parent"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/txtWeek6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="星期五"
+            android:textColor="@android:color/white"
+            android:textSize="20sp"
+            android:layout_gravity="center_horizontal"/>
+
+        <ImageView
+            android:id="@+id/imgWeather6"
+            android:layout_width="55dip"
+            android:layout_height="55dip"
+            android:layout_gravity="center_horizontal"
+            android:src="@drawable/biz_plugin_weather_duoyun"/>
+
+        <TextView
+            android:id="@+id/txtTemperature6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="10~15°C"
+            android:textColor="@android:color/white"
+            android:layout_gravity="center_horizontal"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/txtWeather6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="多云"
+            android:textColor="@android:color/white"
+            android:layout_gravity="center_horizontal"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/txtFeng6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="微风"
+            android:textColor="@android:color/white"
+            android:layout_gravity="center_horizontal"
+            android:textSize="20sp"/>
+    </LinearLayout>
+</LinearLayout>

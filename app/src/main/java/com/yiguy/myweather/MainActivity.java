@@ -6,11 +6,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.media.Image;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -22,6 +27,7 @@ import com.yiguy.bean.TodayWeather;
 import com.yiguy.service.UpdateService;
 import com.yiguy.util.NetUtil;
 
+import org.w3c.dom.Text;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
@@ -34,7 +40,9 @@ import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by Xiaoyi on 2016/9/20.
@@ -45,14 +53,19 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private static final int UPDATE_WEATHER_FINISH = 2;
 
     private String log_tag = "";
+    // 分享按钮
     //更新按钮
     private ImageView mUpdateBtn;
-    // 分享按钮
     private ImageView mShareBtn;
     //选择城市按钮
     private ImageView mCitySelect;
 
     private IntentFilter intentFilter;
+
+    //对应的viewPager
+    private ViewPager viewPager;
+    //view数组
+    private List<View> viewList;
 
     private BroadcastReceiver intentReceiver = new BroadcastReceiver() {
         @Override
@@ -68,8 +81,12 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     private TextView cityTv, timeTv, humidityTv, weekTv, pmDataTv, pmQualityTv, temperatureTv, climateTv, windTv, city_nameTv, currentTemperatureTv;
     private ImageView weatherImg, pmImg;
-    private  ProgressBar progressBar;
-
+    private ProgressBar progressBar;
+    private TextView txtFutWeek1, txtFutWeek2, txtFutWeek3, txtFutWeek4, txtFutWeek5, txtFutWeek6;
+    private ImageView imgFutWeather1, imgFutWeather2, imgFutWeather3, imgFutWeather4, imgFutWeather5, imgFutWeather6;
+    private TextView txtFutTem1, txtFutTem2, txtFutTem3, txtFutTem4, txtFutTem5, txtFutTem6;
+    private TextView txtFutWeather1, txtFutWeather2, txtFutWeather3, txtFutWeather4, txtFutWeather5, txtFutWeather6;
+    private TextView txtFutFeng1, txtFutFeng2, txtFutFeng3, txtFutFeng4, txtFutFeng5, txtFutFeng6;
 
     private Handler mHandler = new Handler() {
         @Override
@@ -90,6 +107,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
         setContentView(R.layout.weather_info);
 
         mUpdateBtn = (ImageView) findViewById(R.id.title_update_btn);
@@ -109,13 +128,48 @@ public class MainActivity extends Activity implements View.OnClickListener {
         // 在应用启动时，启动"定时更新数据"的service服务
         startService(new Intent(getBaseContext(), UpdateService.class));
         initView();
+
+        // 滑动页面
+        viewPager = (ViewPager) findViewById(R.id.vpFutureWeather);
+        LayoutInflater inflater = getLayoutInflater();
+        View future_three = inflater.inflate(R.layout.future_three, null);
+        View future_six = inflater.inflate(R.layout.future_six, null);
+
+        // 将要分页显示的View装入数组中
+        viewList = new ArrayList<View>();
+        viewList.add(future_three);
+        viewList.add(future_six);
+
+        PagerAdapter pagerAdapter = new PagerAdapter() {
+            @Override
+            public int getCount() {
+                return viewList.size();
+            }
+
+            @Override
+            public boolean isViewFromObject(View view, Object object) {
+                return view == object;
+            }
+
+            @Override
+            public Object instantiateItem(ViewGroup container, int position) {
+                container.addView(viewList.get(position));
+                return viewList.get(position);
+            }
+
+            @Override
+            public void destroyItem(ViewGroup container, int position, Object object) {
+                container.removeView(viewList.get(position));
+            }
+        };
+        viewPager.setAdapter(pagerAdapter);
     }
 
 
     // 当天气数据更新之后，更新按钮停止旋转
-    public void updateFinish(){
+    public void updateFinish() {
         mUpdateBtn.setVisibility(View.VISIBLE);
-        RelativeLayout.LayoutParams param = (RelativeLayout.LayoutParams)mShareBtn.getLayoutParams();
+        RelativeLayout.LayoutParams param = (RelativeLayout.LayoutParams) mShareBtn.getLayoutParams();
         param.addRule(RelativeLayout.LEFT_OF, R.id.title_update_btn);
         mShareBtn.setLayoutParams(param);
         progressBar.setVisibility(View.GONE);
@@ -138,7 +192,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 mUpdateBtn.setVisibility(View.GONE);
                 progressBar.setVisibility(View.VISIBLE);
                 // 开始查询之前，将更新按钮的参考位置设置为 progressBar
-                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)mShareBtn.getLayoutParams();
+                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mShareBtn.getLayoutParams();
                 params.addRule(RelativeLayout.LEFT_OF, R.id.title_update_progress);
                 mShareBtn.setLayoutParams(params);
                 // 查询天气状况
@@ -208,7 +262,12 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     }
                     String responseStr = response.toString();
                     Log.d(log_tag, responseStr);
+
+                    // 查询未来天气情况
+                    parseFutureXML(responseStr);
+
                     todayWeather = parseXML(responseStr);
+
                     if (todayWeather != null) {
                         Message msg = new Message();
                         msg.what = UPDATE_TODAY_WEATHER;
@@ -229,6 +288,102 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }).start();
     }
 
+    /**
+     * 解析未来天气信息
+     * @param xmldata
+     * @return
+     */
+    private List<TodayWeather> parseFutureXML(String xmldata) {
+        List<TodayWeather> weatherList = new ArrayList<TodayWeather>();
+        TodayWeather todayWeather = null;
+        int fengxiangCount = 1;
+        int fengliCount = 1;
+        int dateCount = 1;
+        int highCount = 1;
+        int lowCount = 1;
+        int typeCount = 1;
+        try {
+            XmlPullParserFactory fac = XmlPullParserFactory.newInstance();
+            XmlPullParser xmlPullParser = fac.newPullParser();
+            xmlPullParser.setInput(new StringReader(xmldata));
+            int eventType = xmlPullParser.getEventType();
+
+            while (eventType != XmlPullParser.END_DOCUMENT) {
+                switch (eventType) {
+                    //判断当前事件是否为文档开始事件
+                    case XmlPullParser.START_DOCUMENT:
+                        break;
+                    //判断当前事件是否为标签元素开始事件
+                    case XmlPullParser.START_TAG:
+                        if (xmlPullParser.getName().equals("resp")) {
+                            String name = xmlPullParser.getName();
+                            Log.i(log_tag, name);
+                            while (!name.equals("forecast")) {
+                                xmlPullParser.next();
+                                name = xmlPullParser.getName();
+                                if(name == null){
+                                    name = "default";
+                                }
+                                Log.i(log_tag,name);
+                            }
+                            xmlPullParser.next();
+                            if (xmlPullParser.getName().equals("weather")) {
+                                todayWeather = new TodayWeather();
+                                xmlPullParser.next();
+                                if (todayWeather != null) {
+                                    if (xmlPullParser.getName().equals("date") && dateCount == 1) {
+                                        eventType = xmlPullParser.next();
+                                        todayWeather.setDate(xmlPullParser.getText());
+                                        dateCount++;
+                                    } else if (xmlPullParser.getName().equals("high") && highCount == 1) {
+                                        eventType = xmlPullParser.next();
+                                        todayWeather.setHigh(xmlPullParser.getText());
+                                        highCount++;
+                                    } else if (xmlPullParser.getName().equals("low") && lowCount == 1) {
+                                        eventType = xmlPullParser.next();
+                                        todayWeather.setLow(xmlPullParser.getText());
+                                        lowCount++;
+                                    } else if (xmlPullParser.getName().equals("day")) {
+                                        xmlPullParser.next();
+                                        if (xmlPullParser.getName().equals("fengxiang") && fengxiangCount == 1) {
+                                            eventType = xmlPullParser.next();
+                                            todayWeather.setFengxiang(xmlPullParser.getText());
+                                            fengxiangCount++;
+                                        } else if (xmlPullParser.getName().equals("fengli") && fengliCount == 1) {
+                                            eventType = xmlPullParser.next();
+                                            todayWeather.setFengli(xmlPullParser.getText());
+                                            fengliCount++;
+                                        } else if (xmlPullParser.getName().equals("type") && typeCount == 1) {
+                                            eventType = xmlPullParser.next();
+                                            todayWeather.setType(xmlPullParser.getText());
+                                            typeCount++;
+                                        }
+                                    }
+                                    Log.i(log_tag, todayWeather.toString());
+                                }
+                            }
+                        }
+                        break;
+                    //判断当前事件是否为标签元素结束事件
+                    case XmlPullParser.END_TAG:
+                        break;
+                }
+                //进入下一个元素并触发相应事件
+                eventType = xmlPullParser.next();
+            }
+        } catch (XmlPullParserException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        for (TodayWeather weather : weatherList) {
+            Log.i(log_tag, "哈哈哈哈哈");
+        }
+        return weatherList;
+    }
+
 
     /**
      * 解析XML，获取当前城市的天气信息
@@ -237,7 +392,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
      */
     private TodayWeather parseXML(String xmldata) {
         TodayWeather todayWeather = null;
-
         int fengxiangCount = 0;
         int fengliCount = 0;
         int dateCount = 0;
@@ -249,7 +403,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
             XmlPullParser xmlPullParser = fac.newPullParser();
             xmlPullParser.setInput(new StringReader(xmldata));
             int eventType = xmlPullParser.getEventType();
-            Log.d(log_tag, "pareseXML");
             while (eventType != XmlPullParser.END_DOCUMENT) {
                 switch (eventType) {
                     //判断当前事件是否为文档开始事件
@@ -321,7 +474,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
         return todayWeather;
     }
 
-    void initView() {
+    /**
+     * 查找各个View
+     */
+    private void findViews() {
         city_nameTv = (TextView) findViewById(R.id.title_city_name);
         cityTv = (TextView) findViewById(R.id.city);
         timeTv = (TextView) findViewById(R.id.time);
@@ -336,8 +492,46 @@ public class MainActivity extends Activity implements View.OnClickListener {
         currentTemperatureTv = (TextView) findViewById(R.id.currentTemperature);
         weatherImg = (ImageView) findViewById(R.id.weather_img);
         mShareBtn = (ImageView) findViewById(R.id.title_share);
-        progressBar = (ProgressBar)findViewById(R.id.title_update_progress);
+        progressBar = (ProgressBar) findViewById(R.id.title_update_progress);
 
+        txtFutWeek1 = (TextView) findViewById(R.id.txtWeek1);
+        txtFutWeek2 = (TextView) findViewById(R.id.txtWeek2);
+        txtFutWeek3 = (TextView) findViewById(R.id.txtWeek3);
+        txtFutWeek4 = (TextView) findViewById(R.id.txtWeek4);
+        txtFutWeek5 = (TextView) findViewById(R.id.txtWeek5);
+        txtFutWeek6 = (TextView) findViewById(R.id.txtWeek6);
+
+        imgFutWeather1 = (ImageView) findViewById(R.id.imgWeather1);
+        imgFutWeather2 = (ImageView) findViewById(R.id.imgWeather2);
+        imgFutWeather3 = (ImageView) findViewById(R.id.imgWeather3);
+        imgFutWeather4 = (ImageView) findViewById(R.id.imgWeather4);
+        imgFutWeather5 = (ImageView) findViewById(R.id.imgWeather5);
+        imgFutWeather6 = (ImageView) findViewById(R.id.imgWeather6);
+
+        txtFutTem1 = (TextView) findViewById(R.id.txtTemperature1);
+        txtFutTem2 = (TextView) findViewById(R.id.txtTemperature2);
+        txtFutTem3 = (TextView) findViewById(R.id.txtTemperature3);
+        txtFutTem4 = (TextView) findViewById(R.id.txtTemperature4);
+        txtFutTem5 = (TextView) findViewById(R.id.txtTemperature5);
+        txtFutTem6 = (TextView) findViewById(R.id.txtTemperature6);
+
+        txtFutWeather1 = (TextView) findViewById(R.id.txtWeather1);
+        txtFutWeather2 = (TextView) findViewById(R.id.txtWeather2);
+        txtFutWeather3 = (TextView) findViewById(R.id.txtWeather3);
+        txtFutWeather4 = (TextView) findViewById(R.id.txtWeather4);
+        txtFutWeather5 = (TextView) findViewById(R.id.txtWeather5);
+        txtFutWeather6 = (TextView) findViewById(R.id.txtWeather6);
+
+        txtFutFeng1 = (TextView) findViewById(R.id.txtFeng1);
+        txtFutFeng2 = (TextView) findViewById(R.id.txtFeng2);
+        txtFutFeng3 = (TextView) findViewById(R.id.txtFeng3);
+        txtFutFeng4 = (TextView) findViewById(R.id.txtFeng4);
+        txtFutFeng5 = (TextView) findViewById(R.id.txtFeng5);
+        txtFutFeng6 = (TextView) findViewById(R.id.txtFeng6);
+    }
+
+    void initView() {
+        findViews();
         city_nameTv.setText("N/A");
         cityTv.setText("N/A");
         timeTv.setText("N/A");

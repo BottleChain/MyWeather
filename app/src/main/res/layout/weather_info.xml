@@ -224,8 +224,10 @@
             </RelativeLayout>
         </RelativeLayout>
 
-        <!--七日天气信息-->
-
+        <!--未来六天天气信息-->
+        <include
+            android:id="@+id/future"
+            layout="@layout/future_weather" />
 
         <!--广告等信息-->
     </LinearLayout>

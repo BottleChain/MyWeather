@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -14,7 +16,6 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.yiguy.app.MyApplication;
@@ -27,7 +28,7 @@ import java.util.List;
  * Created by Xiaoyi on 2016/10/3.
  */
 public class SelectCity extends Activity implements View.OnClickListener{
-
+    private static final int FILTER_CITY = 1;
     private ImageView mBackBtn;
     private EditText search_edit;
     // 城市列表
@@ -36,6 +37,26 @@ public class SelectCity extends Activity implements View.OnClickListener{
     private String cityCode = "";
     // 日志标识
     private String log_tag = "";
+
+    // ListView适配器
+    private ArrayAdapter<String> adapter;
+    private List<City> cityTemp;
+
+    // ListView
+    private ListView lvCity;
+
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case FILTER_CITY:
+                    filterCitys((String) msg.obj);
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
 
     private TextWatcher mTextWatcher = new TextWatcher() {
         private CharSequence temp;
@@ -64,17 +85,32 @@ public class SelectCity extends Activity implements View.OnClickListener{
                 search_edit.setSelection(tempSelection);
             }
 
-            // 过滤符合条件的城市列表
-            String filterStr = s.toString();
-            for(City c: citys){
-                // 简单过滤原则：名字匹配
-                if( (!c.getCity().contains(filterStr))){
-                    citys.remove(c);
-                }
-            }
-
+            // 发送消息给UI线程
+            Message msg = new Message();
+            msg.what = FILTER_CITY;
+            msg.obj = s.toString();
+            mHandler.sendMessage(msg);
         }
     };
+
+
+    protected void filterCitys(String filterStr){
+        cityTemp.clear();
+        // 过滤符合条件的城市列表
+        for(City c: citys){
+            // 简单过滤原则：名字匹配
+            if( (c.getCity().contains(filterStr))){
+                cityTemp.add(c);
+            }
+        }
+        String[] names = new String[cityTemp.size()];
+        for(int i=0; i<cityTemp.size(); i++){
+            names[i] = cityTemp.get(i).getProvince()+ "-" + cityTemp.get(i).getCity();
+        }
+        ArrayAdapter adapterTemp = new ArrayAdapter<String>(
+                SelectCity.this, android.R.layout.simple_list_item_1, names);
+        lvCity.setAdapter(adapterTemp);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,7 +122,7 @@ public class SelectCity extends Activity implements View.OnClickListener{
         mBackBtn = (ImageView)findViewById(R.id.title_back);
         mBackBtn.setOnClickListener(this);
 
-        final ListView lvCity = (ListView)findViewById(R.id.lvCity);
+        lvCity = (ListView)findViewById(R.id.lvCity);
 
         // 设置日志标识
         MyApplication myApp = (MyApplication) getApplication();
@@ -97,26 +133,23 @@ public class SelectCity extends Activity implements View.OnClickListener{
         cityCode = sharedPreferences.getString("main_city_code", "101010100");
         // 获取所有城市的信息
         citys = myApp.getCityList();
+        cityTemp = new ArrayList<City>(citys);
 
         String[] cityName = new String[citys.size()];
         for(int i=0; i<citys.size(); i++){
             cityName[i] = citys.get(i).getProvince()+ "-" + citys.get(i).getCity();
         }
-        final ArrayAdapter<String> adapter=new ArrayAdapter<String>(
+        adapter=new ArrayAdapter<String>(
                 SelectCity.this, android.R.layout.simple_list_item_1, cityName);
         lvCity.setAdapter(adapter);
 
         lvCity.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                cityCode = citys.get(i).getNumber();
-                String cityName = citys.get(i).getProvince() +"-" + citys.get(i).getCity();
+                cityCode = cityTemp.get(i).getNumber();
+                String cityName = cityTemp.get(i).getProvince() +"-" + cityTemp.get(i).getCity();
                 Toast.makeText(SelectCity.this, "您已选中:" + cityName,
                         Toast.LENGTH_SHORT).show();
-                // 被选中的行移动到最顶端
-                //lvCity.setSelection(pos);
-                //lvCity.setSelected(true);
-
             }
         });
     }
