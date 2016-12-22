@@ -40,7 +40,6 @@ public class WelcomeGuideActivity extends AppCompatActivity {
             //提交修改
             editor.commit();
         }
-
         init();
         initViewPager();
     }

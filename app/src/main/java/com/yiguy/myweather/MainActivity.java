@@ -26,6 +26,7 @@ import com.yiguy.app.MyApplication;
 import com.yiguy.bean.TodayWeather;
 import com.yiguy.db.CityDB;
 import com.yiguy.service.UpdateService;
+import com.yiguy.util.AndroidShare;
 import com.yiguy.util.NetUtil;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -68,6 +69,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private ImageView mCitySelect;
 
     private IntentFilter intentFilter;
+
 
     View future_three;
     View future_six;
@@ -171,6 +173,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
         mCitySelect = (ImageView) findViewById(R.id.title_city_manager);
         mCitySelect.setOnClickListener(this);
+
+        mShareBtn = (ImageView) findViewById(R.id.title_share);
+        mShareBtn.setOnClickListener(this);
 
         // 滑动页面
         viewPager = (ViewPager) findViewById(R.id.vpFutureWeather);
@@ -280,6 +285,16 @@ public class MainActivity extends Activity implements View.OnClickListener {
         // 点击定位按钮
         if(view.getId() == R.id.title_location){
             mLocationClient.start();
+        }
+
+        if(view.getId() == R.id.title_share){
+            mShareBtn.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                   AndroidShare as = new AndroidShare(MainActivity.this, "来自Yiguy天气的分享",
+                           "http://hoop8.com/1612D/YsH6Z8Sr.jpg");
+                   as.show();
+                }
+            });
         }
     }
 
