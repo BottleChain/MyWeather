@@ -21,8 +21,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.baidu.location.LocationClient;
 import com.yiguy.app.MyApplication;
 import com.yiguy.bean.TodayWeather;
+import com.yiguy.db.CityDB;
 import com.yiguy.service.UpdateService;
 import com.yiguy.util.NetUtil;
 
@@ -41,6 +43,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import com.baidu.location.BDLocation;
+import com.baidu.location.BDLocationListener;
+import com.baidu.location.LocationClientOption;
 
 
 /**
@@ -51,12 +56,14 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private static final int UPDATE_TODAY_WEATHER = 1;
     private static final int UPDATE_WEATHER_FINISH = 2;
     private static final int UPDATE_FUTURE_WEATHER = 3;
+    private static final int LOCATE_LOCATION = 4;
 
     private String log_tag = "";
     // 分享按钮
     //更新按钮
     private ImageView mUpdateBtn;
     private ImageView mShareBtn;
+    private ImageView mLocationBtn;
     //选择城市按钮
     private ImageView mCitySelect;
 
@@ -70,11 +77,15 @@ public class MainActivity extends Activity implements View.OnClickListener {
     //view数组
     private List<View> viewList;
 
+    public LocationClient mLocationClient = null;
+    public BDLocationListener myListener = null;
+
     private BroadcastReceiver intentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             TodayWeather newWeather = (TodayWeather) intent.getSerializableExtra("newWeather");
             updateTodayWeather(newWeather);
+            // Toast.makeText(MainActivity.this, "天气信息更新成功！" , Toast.LENGTH_SHORT).show();
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             Date curDate = new Date(System.currentTimeMillis());    //获取当前时间
             String time = formatter.format(curDate);
@@ -102,13 +113,44 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     updateFinish();
                     break;
                 case UPDATE_FUTURE_WEATHER:
-                     updateFutureWeather((List<TodayWeather>)msg.obj);
-                break;
+                    updateFutureWeather((List<TodayWeather>)msg.obj);
+                    break;
+                case LOCATE_LOCATION:
+                    getLocation((Bundle)msg.obj);
+                    break;
                 default:
                     break;
             }
         }
     };
+
+
+    private void getLocation(Bundle data){
+        String province = (String)data.get("province");
+        province = province.substring(0, province.length()-1);
+        String city = (String)data.get("city");
+        city = city.substring(0, city.length()-1);
+        String district = (String)data.get("district");
+        district = district.substring(0, district.length()-1);
+
+        if(province != null && city!=null && district!=null) {
+            // 查询数据库，找到对应城市的代码
+            Log.i("MyWeather",province + "   " + city + "  " + district);
+            MyApplication myApp = (MyApplication) getApplication();
+            CityDB cityDB =  myApp.getmCityDB();
+            String number =  cityDB.getCityCode(province, city, district);
+            if(number != null){
+                SharedPreferences sharedPreferences = getSharedPreferences("config", MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("main_city_code", number);
+                editor.commit();
+
+                String cityCode = sharedPreferences.getString("main_city_code", "101010100");
+                queryWeather(cityCode);
+                Toast.makeText(MainActivity.this, "当前定位城市："+city + "-"+district+"。天气信息更新成功！" , Toast.LENGTH_LONG).show();
+            }
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,6 +159,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
         mUpdateBtn = (ImageView) findViewById(R.id.title_update_btn);
         mUpdateBtn.setOnClickListener(this);
+
         // 设置日志标识
         MyApplication myApp = (MyApplication) getApplication();
         log_tag = myApp.getLogTag();
@@ -129,15 +172,22 @@ public class MainActivity extends Activity implements View.OnClickListener {
         mCitySelect = (ImageView) findViewById(R.id.title_city_manager);
         mCitySelect.setOnClickListener(this);
 
-        // 在应用启动时，启动"定时更新数据"的service服务
-        startService(new Intent(getBaseContext(), UpdateService.class));
         // 滑动页面
         viewPager = (ViewPager) findViewById(R.id.vpFutureWeather);
         LayoutInflater inflater = getLayoutInflater();
         future_three = inflater.inflate(R.layout.future_three, null);
         future_six = inflater.inflate(R.layout.future_six, null);
+
+        // 自动定位
+        mLocationClient = new LocationClient(getApplicationContext());     //声明LocationClient类
+        myListener = new MyLocationListener(mLocationClient);
+        mLocationClient.registerLocationListener( myListener );    //注册监听函数
+        initLocation();
+        mLocationClient.start();
+
         initView();
 
+        mLocationBtn.setOnClickListener(this);
         // 将要分页显示的View装入数组中
         viewList = new ArrayList<View>();
         viewList.add(future_three);
@@ -166,8 +216,29 @@ public class MainActivity extends Activity implements View.OnClickListener {
             }
         };
         viewPager.setAdapter(pagerAdapter);
+
+        // 在应用启动时，启动"定时更新数据"的service服务
+        startService(new Intent(getBaseContext(), UpdateService.class));
     }
 
+    // 初始化百度地图
+    private void initLocation(){
+        LocationClientOption option = new LocationClientOption();
+        option.setLocationMode(LocationClientOption.LocationMode.Hight_Accuracy
+        );//可选，默认高精度，设置定位模式，高精度，低功耗，仅设备
+        option.setCoorType("bd09ll");//可选，默认gcj02，设置返回的定位结果坐标系
+        int span=1000;
+        option.setScanSpan(span);//可选，默认0，即仅定位一次，设置发起定位请求的间隔需要大于等于1000ms才是有效的
+        option.setIsNeedAddress(true);//可选，设置是否需要地址信息，默认不需要
+        option.setOpenGps(true);//可选，默认false,设置是否使用gps
+        option.setLocationNotify(true);//可选，默认false，设置是否当GPS有效时按照1S/1次频率输出GPS结果
+        option.setIsNeedLocationDescribe(true);//可选，默认false，设置是否需要位置语义化结果，可以在BDLocation.getLocationDescribe里得到，结果类似于“在北京天安门附近”
+        option.setIsNeedLocationPoiList(true);//可选，默认false，设置是否需要POI结果，可以在BDLocation.getPoiList里得到
+        option.setIgnoreKillProcess(false);//可选，默认true，定位SDK内部是一个SERVICE，并放到了独立进程，设置是否在stop的时候杀死这个进程，默认不杀死
+        option.SetIgnoreCacheException(false);//可选，默认false，设置是否收集CRASH信息，默认收集
+        option.setEnableSimulateGps(false);//可选，默认false，设置是否需要过滤GPS仿真结果，默认需要
+        mLocationClient.setLocOption(option);
+    }
 
     // 当天气数据更新之后，更新按钮停止旋转
     public void updateFinish() {
@@ -200,11 +271,15 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 mShareBtn.setLayoutParams(params);
                 // 查询天气状况
                 queryWeather(cityCode);
-
+                Toast.makeText(MainActivity.this, "天气信息更新成功！", Toast.LENGTH_SHORT).show();
             } else {
                 Log.d(log_tag, "网络挂了");
                 Toast.makeText(MainActivity.this, "网络挂了！", Toast.LENGTH_LONG).show();
             }
+        }
+        // 点击定位按钮
+        if(view.getId() == R.id.title_location){
+            mLocationClient.start();
         }
     }
 
@@ -237,9 +312,35 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
     }
 
+    private class MyLocationListener implements BDLocationListener {
+
+        public LocationClient mLocationClient = null;
+
+        MyLocationListener(LocationClient client){
+            mLocationClient = client;
+        }
+
+        @Override
+        public void onReceiveLocation(BDLocation location) {
+            String province = location.getProvince();
+            String city = location.getCity();
+            String district = location.getDistrict();
+
+            Message msg = new Message();
+            msg.what = LOCATE_LOCATION;
+            Bundle bundle = new Bundle();
+            bundle.putString("province", province);
+            bundle.putString("city",city);
+            bundle.putString("district",district);
+
+            msg.obj = bundle;
+            mHandler.sendMessage(msg);
+            mLocationClient.stop();
+        }
+    }
+
     /**
      * 查询某城市的天气信息
-     *
      * @param cityCode 当前所在城市编码
      */
     private void queryWeather(String cityCode) {
@@ -284,7 +385,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
                         msg.obj = weatherList;
                         mHandler.sendMessage(msg);
                     }
-
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
@@ -425,7 +525,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     case XmlPullParser.END_TAG:
                         if (xmlPullParser.getName().equals("weather") || xmlPullParser.getName().equals("yesterday")) {
                             weatherList.add(weather);
-                            Log.i(log_tag, weather.toString());
                         }
                         break;
                 }
@@ -458,6 +557,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         currentTemperatureTv = (TextView) findViewById(R.id.currentTemperature);
         weatherImg = (ImageView) findViewById(R.id.weather_img);
         mShareBtn = (ImageView) findViewById(R.id.title_share);
+        mLocationBtn = (ImageView) findViewById(R.id.title_location);
         progressBar = (ProgressBar) findViewById(R.id.title_update_progress);
 
         txtFutWeek1 = (TextView) future_three.findViewById(R.id.txtWeek1);
@@ -509,9 +609,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
         climateTv.setText("N/A");
         windTv.setText("N/A");
         currentTemperatureTv.setText("N/A");
-
-        String initCityCode = "101010100";
-        queryWeather(initCityCode);
     }
 
     // 关闭应用时，关闭"定时更新数据"的服务
@@ -574,7 +671,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
         //更新天气情况图片
         String type = todayWeather.getType();
         weatherImg.setImageResource(getRightImg(type));
-        Toast.makeText(MainActivity.this, "更新成功！", Toast.LENGTH_SHORT).show();
     }
 
     /**

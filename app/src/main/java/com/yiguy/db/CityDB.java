@@ -36,4 +36,23 @@ public class CityDB {
         }
         return list;
     }
+
+    public String getCityCode (String provinceParam, String cityParam,String districtParam){
+        Cursor c = db.rawQuery("SELECT * from " + CITY_TABLE_NAME + " where province like '%" + provinceParam +"%' and city like '%" + districtParam + "%'", null);
+        int count = c.getCount();
+        if(count == 1){
+            c.moveToNext();
+            String number = c.getString(c.getColumnIndex("number"));
+            return number;
+        }
+
+        Cursor cc = db.rawQuery("SELECT * from " + CITY_TABLE_NAME + " where province like '%" + provinceParam +"%' and city like '%" + cityParam + "%'", null);
+        count = cc.getCount();
+        if(count == 1){
+            c.moveToNext();
+            String number = c.getString(c.getColumnIndex("number"));
+            return number;
+        }
+        return null;
+    }
 }

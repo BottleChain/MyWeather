@@ -106,4 +106,8 @@ public class MyApplication extends Application {
         }
         return new CityDB(this, path);
     }
+
+    public CityDB getmCityDB() {
+        return mCityDB;
+    }
 }
