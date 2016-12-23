@@ -6,4 +6,6 @@
     <color name="blue">#0000ff</color>
     <color name="orange">#ff9900</color>
     <color name="defColor">@android:color/transparent</color>
+    <color name="white">@android:color/transparent</color>
+    <color name="item_click">#ff9900</color>
 </resources>

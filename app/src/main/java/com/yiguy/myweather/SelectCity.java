@@ -52,6 +52,9 @@ public class SelectCity extends Activity implements View.OnClickListener{
     // 日志标识
     private String log_tag = "";
 
+
+    private LayoutInflater inflater;
+
     // ListView适配器
     private ArrayAdapter<String> adapter;
     private List<City> cityTemp;
@@ -98,7 +101,6 @@ public class SelectCity extends Activity implements View.OnClickListener{
                 search_edit.setText(s);
                 search_edit.setSelection(tempSelection);
             }
-
             // 发送消息给UI线程
             Message msg = new Message();
             msg.what = FILTER_CITY;
@@ -106,6 +108,49 @@ public class SelectCity extends Activity implements View.OnClickListener{
             mHandler.sendMessage(msg);
         }
     };
+
+    private class ListViewAdapter extends BaseAdapter {
+
+        List<City> cityList = null;
+        public ListViewAdapter(List<City> cityParam) {
+            super();
+            cityList = cityParam;
+            inflater = LayoutInflater.from(SelectCity.this);
+        }
+
+        @Override
+        public int getCount() {
+            return cityList.size();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return cityList.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View view = convertView;
+            if (view == null) {
+                view = inflater.inflate(R.layout.item, parent, false);
+                ViewHolder viewHolder = new ViewHolder();
+                viewHolder.content = (TextView) view.findViewById(R.id.textViewId);
+                view.setTag(viewHolder);
+            }
+            ViewHolder viewHolder = (ViewHolder) view.getTag();
+            viewHolder.content.setText( cityList.get(position).getProvince()+ "-" + cityList.get(position).getCity());
+            return view;
+        }
+    }
+
+    private class ViewHolder {
+        private TextView content;
+    }
 
 
     protected void filterCitys(String filterStr){
@@ -121,9 +166,12 @@ public class SelectCity extends Activity implements View.OnClickListener{
         for(int i=0; i<cityTemp.size(); i++){
             names[i] = cityTemp.get(i).getProvince()+ "-" + cityTemp.get(i).getCity();
         }
-        ArrayAdapter adapterTemp = new ArrayAdapter<String>(
-                SelectCity.this, android.R.layout.simple_list_item_1, names);
-        lvCity.setAdapter(adapterTemp);
+
+        ListViewAdapter adapter = new ListViewAdapter(cityTemp);
+        lvCity.setAdapter(adapter);
+      /*  ArrayAdapter adapterTemp = new ArrayAdapter<String>(
+                SelectCity.this, android.R.layout.simple_list_item_1, names);*/
+     //   lvCity.setAdapter(adapterTemp);
     }
 
     @Override
@@ -157,17 +205,19 @@ public class SelectCity extends Activity implements View.OnClickListener{
         for(int i=0; i<citys.size(); i++){
             cityName[i] = citys.get(i).getProvince()+ "-" + citys.get(i).getCity();
         }
-        adapter=new ArrayAdapter<String>(
-                SelectCity.this, android.R.layout.simple_list_item_1, cityName);
+
+        ListViewAdapter adapter = new ListViewAdapter(citys);
         lvCity.setAdapter(adapter);
+        lvCity.setItemsCanFocus(true);// 让ListView的item获得焦点
+        lvCity.setChoiceMode(ListView.CHOICE_MODE_SINGLE);// 单选模式
+        // 默认第一个item被选中
+        lvCity.setItemChecked(0, true);
 
         lvCity.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 cityCode = cityTemp.get(i).getNumber();
-                String cityName = cityTemp.get(i).getProvince() +"-" + cityTemp.get(i).getCity();
-                Toast.makeText(SelectCity.this, "您已选中:" + cityName,
-                        Toast.LENGTH_SHORT).show();
+                //String cityName = cityTemp.get(i).getProvince() +"-" + cityTemp.get(i).getCity();
             }
         });
     }
