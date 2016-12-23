@@ -13,8 +13,10 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_below="@+id/title"
-        android:background="@drawable/biz_plugin_weather_shenzhen_bg"
+        android:background="@drawable/bg_city"
         android:orientation="vertical">
+       <!-- android:background="@drawable/biz_plugin_weather_shenzhen_bg"-->
+
 
         <!--今日天气信息-->
         <RelativeLayout

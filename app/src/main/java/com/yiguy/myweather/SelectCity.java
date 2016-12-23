@@ -211,7 +211,7 @@ public class SelectCity extends Activity implements View.OnClickListener{
         lvCity.setItemsCanFocus(true);// 让ListView的item获得焦点
         lvCity.setChoiceMode(ListView.CHOICE_MODE_SINGLE);// 单选模式
         // 默认第一个item被选中
-        lvCity.setItemChecked(0, true);
+       // lvCity.setItemChecked(0, true);
 
         lvCity.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
