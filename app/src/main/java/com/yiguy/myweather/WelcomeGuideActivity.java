@@ -10,6 +10,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,17 +21,23 @@ public class WelcomeGuideActivity extends AppCompatActivity {
     private ViewPager pager;
     private List<View> list;
 
+    private ViewPager vp_guide;
+    private List<ImageView> mImgList;//导航图集合
+    private LinearLayout ll_container;//小圆点容器
+    private int mCurrentIndex = 0;//当前小圆点的位置
+    private int[] imgArray = {R.drawable.page, R.drawable.page, R.drawable.page, R.drawable.page};
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome_guide);
 
-        SharedPreferences preferences = getSharedPreferences("count",MODE_PRIVATE);
+        SharedPreferences preferences = getSharedPreferences("count", MODE_PRIVATE);
         int count = preferences.getInt("count", 0);
         // 如果不是第一次运行，直接跳转到MainActivity页面
-        if (count==1) {
+        if (count == 1) {
             Intent intent = new Intent();
-            intent.setClass(getApplicationContext(),MainActivity.class);
+            intent.setClass(getApplicationContext(), MainActivity.class);
             startActivity(intent);
             this.finish();
         } else {
@@ -40,8 +48,32 @@ public class WelcomeGuideActivity extends AppCompatActivity {
             //提交修改
             editor.commit();
         }
+
+        ll_container = (LinearLayout) findViewById(R.id.guide_container);
+        mImgList = new ArrayList<>();
+        for (int i = 0; i < imgArray.length; i++) {
+            //获取4个圆点
+            ImageView imageView = new ImageView(this);
+            imageView.setImageResource(imgArray[i]);
+            mImgList.add(imageView);
+            ImageView dot = new ImageView(this);
+            if (i == mCurrentIndex) {
+                dot.setImageResource(R.drawable.page_now); //设置当前页的圆点
+            } else {
+                dot.setImageResource(R.drawable.page); //其余页的圆点
+            }
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout
+                    .LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            if (i > 0) {
+                params.leftMargin = 10;//设置圆点边距
+            }
+            dot.setLayoutParams(params);
+            ll_container.addView(dot);//将圆点添加到容器中
+        }
+
         init();
         initViewPager();
+
     }
 
     public void click(View view) {
@@ -89,6 +121,17 @@ public class WelcomeGuideActivity extends AppCompatActivity {
                     btn.setVisibility(View.VISIBLE);
                 } else {
                     btn.setVisibility(View.GONE);
+                }
+
+                //根据监听的页面改变当前页对应的小圆点
+                mCurrentIndex = arg0;
+                for (int i = 0; i < ll_container.getChildCount(); i++) {
+                    ImageView imageView = (ImageView) ll_container.getChildAt(i);
+                    if (i == arg0) {
+                        imageView.setImageResource(R.drawable.page_now);
+                    } else {
+                        imageView.setImageResource(R.drawable.page);
+                    }
                 }
             }
 

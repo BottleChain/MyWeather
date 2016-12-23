@@ -63,6 +63,35 @@ public class WeatherUtil {
         }).start();
     }
 
+    // 同步查询天气状况
+    public static List<TodayWeather> syncQueryWeather(String cityCode) {
+        String address = "http://wthrcdn.etouch.cn/WeatherApi?citykey=" + cityCode;
+        HttpURLConnection con = null;
+        List<TodayWeather> weatherList = null;
+        try {
+            URL url = new URL(address);
+            con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("GET");
+            con.setConnectTimeout(8000);
+            con.setReadTimeout(8000);
+            InputStream in = con.getInputStream();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+            StringBuilder response = new StringBuilder();
+            String str;
+            while ((str = reader.readLine()) != null) {
+                response.append(str);
+            }
+            String responseStr = response.toString();
+            weatherList = parseXML(responseStr);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (con != null) {
+                con.disconnect();
+            }
+        }
+        return weatherList;
+    }
 
     /**
      * 解析XML，获取当前城市昨天-今天-以及未来的天气信息

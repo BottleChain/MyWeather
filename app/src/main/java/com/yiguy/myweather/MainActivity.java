@@ -24,6 +24,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -98,14 +99,30 @@ public class MainActivity extends Activity implements View.OnClickListener {
     //view数组
     private List<View> viewList;
 
+    private ViewPager vp_guide;
+    private List<ImageView> mImgList;//导航图集合
+    private LinearLayout ll_container;//小圆点容器
+    private int mCurrentIndex = 0;//当前小圆点的位置
+    private int[] imgArray = {R.drawable.page, R.drawable.page};
+
     public LocationClient mLocationClient = null;
     public BDLocationListener myListener = null;
 
     private BroadcastReceiver intentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            TodayWeather newWeather = (TodayWeather) intent.getSerializableExtra("newWeather");
+            TodayWeather newWeather = (TodayWeather) intent.getSerializableExtra("weather1");
             updateTodayWeather(newWeather);
+
+            List<TodayWeather> weatherList = new ArrayList<TodayWeather>();
+            weatherList.add((TodayWeather) intent.getSerializableExtra("weather0"));
+            weatherList.add((TodayWeather) intent.getSerializableExtra("weather1"));
+            weatherList.add((TodayWeather) intent.getSerializableExtra("weather2"));
+            weatherList.add((TodayWeather) intent.getSerializableExtra("weather3"));
+            weatherList.add((TodayWeather) intent.getSerializableExtra("weather4"));
+            weatherList.add((TodayWeather) intent.getSerializableExtra("weather5"));
+            updateFutureWeather(weatherList);
+
             // Toast.makeText(MainActivity.this, "天气信息更新成功！" , Toast.LENGTH_SHORT).show();
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             Date curDate = new Date(System.currentTimeMillis());    //获取当前时间
@@ -147,29 +164,36 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
 
     private void getLocation(Bundle data){
-        String province = (String)data.get("province");
-        province = province.substring(0, province.length()-1);
-        String city = (String)data.get("city");
-        city = city.substring(0, city.length()-1);
-        String district = (String)data.get("district");
-        district = district.substring(0, district.length()-1);
+        try {
+            String province = (String) data.get("province");
+            province = province.substring(0, province.length() - 1);
+            String city = (String) data.get("city");
+            city = city.substring(0, city.length() - 1);
+            String district = (String) data.get("district");
+            district = district.substring(0, district.length() - 1);
 
-        if(province != null && city!=null && district!=null) {
-            // 查询数据库，找到对应城市的代码
-            Log.i("MyWeather",province + "   " + city + "  " + district);
-            MyApplication myApp = (MyApplication) getApplication();
-            CityDB cityDB =  myApp.getmCityDB();
-            String number =  cityDB.getCityCode(province, city, district);
-            if(number != null){
-                SharedPreferences sharedPreferences = getSharedPreferences("config", MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString("main_city_code", number);
-                editor.commit();
+            if (province != null && city != null && district != null) {
+                // 查询数据库，找到对应城市的代码
+                Log.i("MyWeather", province + "   " + city + "  " + district);
+                MyApplication myApp = (MyApplication) getApplication();
+                CityDB cityDB = myApp.getmCityDB();
+                String number = cityDB.getCityCode(province, city, district);
+                if (number != null) {
+                    SharedPreferences sharedPreferences = getSharedPreferences("config", MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString("main_city_code", number);
+                    editor.commit();
 
-                String cityCode = sharedPreferences.getString("main_city_code", "101010100");
-                queryWeather(cityCode);
-                Toast.makeText(MainActivity.this, "当前定位城市："+city + "-"+district+"。天气信息更新成功！" , Toast.LENGTH_LONG).show();
+                    String cityCode = sharedPreferences.getString("main_city_code", "101010100");
+                    queryWeather(cityCode);
+                    Toast.makeText(MainActivity.this, "当前定位城市：" + city + "-" + district + "。天气信息更新成功！", Toast.LENGTH_LONG).show();
+                }
             }
+        } catch (Exception e){
+            SharedPreferences sharedPreferences = getSharedPreferences("config", MODE_PRIVATE);
+            String cityCode = sharedPreferences.getString("main_city_code", "101010100");
+            queryWeather(cityCode);
+            Toast.makeText(MainActivity.this, "为获得更好的体验，请您允许APP获取位置！", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -226,6 +250,30 @@ public class MainActivity extends Activity implements View.OnClickListener {
         mShareBtn = (ImageView) findViewById(R.id.title_share);
         mShareBtn.setOnClickListener(this);
 
+
+        ll_container = (LinearLayout) findViewById(R.id.ll_container);
+        mImgList = new ArrayList<>();
+        for (int i = 0; i < imgArray.length; i++) {
+            //获取4个圆点
+            ImageView imageView = new ImageView(this);
+            imageView.setImageResource(imgArray[i]);
+            mImgList.add(imageView);
+            ImageView dot = new ImageView(this);
+            if (i == mCurrentIndex) {
+                dot.setImageResource(R.drawable.page_now); //设置当前页的圆点
+            } else {
+                dot.setImageResource(R.drawable.page); //其余页的圆点
+            }
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout
+                    .LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            if (i > 0) {
+                params.leftMargin = 10;//设置圆点边距
+            }
+            dot.setLayoutParams(params);
+            ll_container.addView(dot);//将圆点添加到容器中
+        }
+
+
         // 滑动页面
         viewPager = (ViewPager) findViewById(R.id.vpFutureWeather);
         LayoutInflater inflater = getLayoutInflater();
@@ -271,13 +319,41 @@ public class MainActivity extends Activity implements View.OnClickListener {
         };
         viewPager.setAdapter(pagerAdapter);
 
+
+        //给viewpager添加监听
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int
+                    positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                //根据监听的页面改变当前页对应的小圆点
+                mCurrentIndex = position;
+                for (int i = 0; i < ll_container.getChildCount(); i++) {
+                    ImageView imageView = (ImageView) ll_container.getChildAt(i);
+                    if (i == position) {
+                        imageView.setImageResource(R.drawable.page_now);
+                    } else {
+                        imageView.setImageResource(R.drawable.page);
+                    }
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+
         // 在应用启动时，启动"定时更新数据"的service服务
         startService(new Intent(getBaseContext(), UpdateService.class));
 
         //得到日历实例，主要是为了下面的获取时间
         c = Calendar.getInstance();
 
-       // nm =(NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         // 设置定时提醒的时间
         setTime(7,0);
     }
@@ -393,20 +469,24 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
         @Override
         public void onReceiveLocation(BDLocation location) {
-            String province = location.getProvince();
-            String city = location.getCity();
-            String district = location.getDistrict();
+            try {
+                String province = location.getProvince();
+                String city = location.getCity();
+                String district = location.getDistrict();
 
-            Message msg = new Message();
-            msg.what = LOCATE_LOCATION;
-            Bundle bundle = new Bundle();
-            bundle.putString("province", province);
-            bundle.putString("city",city);
-            bundle.putString("district",district);
+                Message msg = new Message();
+                msg.what = LOCATE_LOCATION;
+                Bundle bundle = new Bundle();
+                bundle.putString("province", province);
+                bundle.putString("city", city);
+                bundle.putString("district", district);
 
-            msg.obj = bundle;
-            mHandler.sendMessage(msg);
-            mLocationClient.stop();
+                msg.obj = bundle;
+                mHandler.sendMessage(msg);
+                mLocationClient.stop();
+            } catch (Exception e){
+
+            }
         }
     }
 

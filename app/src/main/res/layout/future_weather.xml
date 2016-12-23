@@ -11,4 +11,14 @@
         android:layout_gravity="center" >
     </android.support.v4.view.ViewPager>
 
+
+    <LinearLayout
+        android:id="@+id/ll_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:paddingBottom="30dip"
+        android:gravity="center"
+        android:orientation="horizontal"/>
+
 </RelativeLayout>

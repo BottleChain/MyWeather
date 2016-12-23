@@ -9,6 +9,16 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" />
 
+    <LinearLayout
+        android:id="@+id/guide_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:paddingBottom="40dip"
+        android:gravity="center"
+        android:orientation="horizontal"/>
+
+
     <Button
         android:id="@+id/welcome_guide_btn"
         android:layout_width="180dip"
