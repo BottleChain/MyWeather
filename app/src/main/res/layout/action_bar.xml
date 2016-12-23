@@ -52,12 +52,14 @@
         android:layout_width="45.0dip"
         android:layout_height="45.0dip"
         android:layout_toLeftOf="@+id/title_update_btn"
-        android:src="@drawable/title_share" />
+        android:src="@drawable/title_share"
+        android:focusableInTouchMode="false" />
 
     <ImageView
         android:id="@+id/title_location"
         android:layout_width="45.0dip"
         android:layout_height="45.0dip"
         android:layout_toLeftOf="@+id/title_share"
+        android:focusableInTouchMode="false"
         android:src="@drawable/base_action_bar_action_city" />
 </RelativeLayout>

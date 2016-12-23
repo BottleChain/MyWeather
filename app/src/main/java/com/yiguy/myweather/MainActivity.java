@@ -1,24 +1,33 @@
 package com.yiguy.myweather;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.TimePickerDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.baidu.location.LocationClient;
@@ -42,8 +51,11 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
+
 import com.baidu.location.BDLocation;
 import com.baidu.location.BDLocationListener;
 import com.baidu.location.LocationClientOption;
@@ -60,6 +72,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private static final int LOCATE_LOCATION = 4;
 
     private String log_tag = "";
+
+    private Calendar c = null;
+
     // 分享按钮
     //更新按钮
     private ImageView mUpdateBtn;
@@ -69,6 +84,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private ImageView mCitySelect;
 
     private IntentFilter intentFilter;
+
+    // 通知栏
+    private static final int NOTIFICATION_ID = 0x123;
+    private NotificationManager nm;
 
 
     View future_three;
@@ -154,6 +173,36 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
     }
 
+    // 设置定时时间
+    public void setTime(int hourParam, int minParam){
+        c.setTimeInMillis(System.currentTimeMillis());
+        c.setTimeInMillis(System.currentTimeMillis());
+        // 这里时区需要设置一下，不然会有8个小时的时间差
+        c.setTimeZone(TimeZone.getTimeZone("GMT+8"));
+        //设置小时分钟，秒和毫秒都设置为0
+        c.set(Calendar.HOUR_OF_DAY, hourParam);
+        c.set(Calendar.MINUTE, minParam);
+        c.set(Calendar.SECOND, 0);
+        c.set(Calendar.MILLISECOND, 0);
+
+        Intent intent = new Intent(MainActivity.this, AlarmReceiver.class);
+        PendingIntent pi = PendingIntent.getBroadcast(MainActivity.this, 0, intent, 0);
+        //得到AlarmManager实例
+        AlarmManager am = (AlarmManager)getSystemService(ALARM_SERVICE);
+        //根据当前时间预设一个警报
+        // am.set(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), pi);
+
+        // 计算延迟时间
+        long dayLong = 24 * 60 * 60 * 1000;
+        long delay = c.getTimeInMillis()- System.currentTimeMillis();
+        if(delay < 0){
+            delay = dayLong + c.getTimeInMillis();
+        } else {
+            delay = c.getTimeInMillis();
+        }
+        am.setRepeating(AlarmManager.RTC_WAKEUP, delay, dayLong, pi);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -224,6 +273,13 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
         // 在应用启动时，启动"定时更新数据"的service服务
         startService(new Intent(getBaseContext(), UpdateService.class));
+
+        //得到日历实例，主要是为了下面的获取时间
+        c = Calendar.getInstance();
+
+       // nm =(NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        // 设置定时提醒的时间
+        setTime(7,0);
     }
 
     // 初始化百度地图
@@ -770,8 +826,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
         txtFutFeng6.setText(weather6.getFengli());
         imgFutWeather6.setImageResource(getRightImg(weather6.getType()));
     }
-    
-    
+
+
     private int getRightImg(String type){
         if (type.equals("晴")) {
            return R.drawable.biz_plugin_weather_qing;
