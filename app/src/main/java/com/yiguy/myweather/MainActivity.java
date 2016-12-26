@@ -841,82 +841,86 @@ public class MainActivity extends Activity implements View.OnClickListener {
      * @param weatherList
      */
     void updateFutureWeather(List<TodayWeather> weatherList) {
-        if (weatherList != null && weatherList.size() == 6) {
-            int count = weatherList.size();
-            TodayWeather weather1 = weatherList.get(0);
-            String week = weather1.getDate().substring(3);
-            txtFutWeek1.setText(week);
-            String low = weather1.getLow();
-            low = low.substring(3, low.length() - 1);
-            String high = weather1.getHigh();
-            high = high.substring(3, high.length() - 1);
-            txtFutTem1.setText(low + "~" + high + "°C");
-            txtFutWeather1.setText(weather1.getType());
-            imgFutWeather1.setImageResource(getRightImg(weather1.getType()));
-            txtFutFeng1.setText(weather1.getFengli());
+        try {
+            if (weatherList != null && weatherList.size() == 6) {
+                int count = weatherList.size();
+                TodayWeather weather1 = weatherList.get(0);
+                String week = weather1.getDate().substring(3);
+                txtFutWeek1.setText(week);
+                String low = weather1.getLow();
+                low = low.substring(3, low.length() - 1);
+                String high = weather1.getHigh();
+                high = high.substring(3, high.length() - 1);
+                txtFutTem1.setText(low + "~" + high + "°C");
+                txtFutWeather1.setText(weather1.getType());
+                imgFutWeather1.setImageResource(getRightImg(weather1.getType()));
+                txtFutFeng1.setText(weather1.getFengli());
 
-            TodayWeather weather2 = weatherList.get(1);
-            String week2 = weather2.getDate().substring(3);
-            txtFutWeek2.setText(week2);
-            String low2 = weather2.getLow();
-            low2 = low2.substring(3, low2.length() - 1);
-            String high2 = weather2.getHigh();
-            high2 = high2.substring(3, high2.length() - 1);
-            txtFutTem2.setText(low2 + "~" + high2 + "°C");
-            txtFutWeather2.setText(weather2.getType());
-            imgFutWeather2.setImageResource(getRightImg(weather2.getType()));
-            txtFutFeng2.setText(weather2.getFengli());
-
-
-            TodayWeather weather3 = weatherList.get(2);
-            String week3 = weather3.getDate().substring(3);
-            txtFutWeek3.setText(week3);
-            String low3 = weather3.getLow();
-            low3 = low3.substring(3, low3.length() - 1);
-            String high3 = weather3.getHigh();
-            high3 = high3.substring(3, high3.length() - 1);
-            txtFutTem3.setText(low3 + "~" + high3 + "°C");
-            txtFutWeather3.setText(weather3.getType());
-            txtFutFeng3.setText(weather3.getFengli());
-            imgFutWeather3.setImageResource(getRightImg(weather3.getType()));
+                TodayWeather weather2 = weatherList.get(1);
+                String week2 = weather2.getDate().substring(3);
+                txtFutWeek2.setText(week2);
+                String low2 = weather2.getLow();
+                low2 = low2.substring(3, low2.length() - 1);
+                String high2 = weather2.getHigh();
+                high2 = high2.substring(3, high2.length() - 1);
+                txtFutTem2.setText(low2 + "~" + high2 + "°C");
+                txtFutWeather2.setText(weather2.getType());
+                imgFutWeather2.setImageResource(getRightImg(weather2.getType()));
+                txtFutFeng2.setText(weather2.getFengli());
 
 
-            TodayWeather weather4 = weatherList.get(3);
-            String week4 = weather4.getDate().substring(3);
-            txtFutWeek4.setText(week4);
-            String low4 = weather4.getLow();
-            low4 = low4.substring(3, low4.length() - 1);
-            String high4 = weather4.getHigh();
-            high4 = high4.substring(3, high4.length() - 1);
-            txtFutTem4.setText(low4 + "~" + high4 + "°C");
-            txtFutWeather4.setText(weather4.getType());
-            txtFutFeng4.setText(weather4.getFengli());
-            imgFutWeather4.setImageResource(getRightImg(weather4.getType()));
-
-            TodayWeather weather5 = weatherList.get(4);
-            String week5 = weather5.getDate().substring(3);
-            txtFutWeek5.setText(week5);
-            String low5 = weather5.getLow();
-            low5 = low5.substring(3, low5.length() - 1);
-            String high5 = weather5.getHigh();
-            high5 = high5.substring(3, high5.length() - 1);
-            txtFutTem5.setText(low5 + "~" + high5 + "°C");
-            txtFutWeather5.setText(weather5.getType());
-            txtFutFeng5.setText(weather5.getFengli());
-            imgFutWeather5.setImageResource(getRightImg(weather5.getType()));
+                TodayWeather weather3 = weatherList.get(2);
+                String week3 = weather3.getDate().substring(3);
+                txtFutWeek3.setText(week3);
+                String low3 = weather3.getLow();
+                low3 = low3.substring(3, low3.length() - 1);
+                String high3 = weather3.getHigh();
+                high3 = high3.substring(3, high3.length() - 1);
+                txtFutTem3.setText(low3 + "~" + high3 + "°C");
+                txtFutWeather3.setText(weather3.getType());
+                txtFutFeng3.setText(weather3.getFengli());
+                imgFutWeather3.setImageResource(getRightImg(weather3.getType()));
 
 
-            TodayWeather weather6 = weatherList.get(5);
-            String week6 = weather6.getDate().substring(3);
-            txtFutWeek6.setText(week6);
-            String low6 = weather6.getLow();
-            low6 = low6.substring(3, low6.length() - 1);
-            String high6 = weather6.getHigh();
-            high6 = high6.substring(3, high6.length() - 1);
-            txtFutTem6.setText(low6 + "~" + high6 + "°C");
-            txtFutWeather6.setText(weather6.getType());
-            txtFutFeng6.setText(weather6.getFengli());
-            imgFutWeather6.setImageResource(getRightImg(weather6.getType()));
+                TodayWeather weather4 = weatherList.get(3);
+                String week4 = weather4.getDate().substring(3);
+                txtFutWeek4.setText(week4);
+                String low4 = weather4.getLow();
+                low4 = low4.substring(3, low4.length() - 1);
+                String high4 = weather4.getHigh();
+                high4 = high4.substring(3, high4.length() - 1);
+                txtFutTem4.setText(low4 + "~" + high4 + "°C");
+                txtFutWeather4.setText(weather4.getType());
+                txtFutFeng4.setText(weather4.getFengli());
+                imgFutWeather4.setImageResource(getRightImg(weather4.getType()));
+
+                TodayWeather weather5 = weatherList.get(4);
+                String week5 = weather5.getDate().substring(3);
+                txtFutWeek5.setText(week5);
+                String low5 = weather5.getLow();
+                low5 = low5.substring(3, low5.length() - 1);
+                String high5 = weather5.getHigh();
+                high5 = high5.substring(3, high5.length() - 1);
+                txtFutTem5.setText(low5 + "~" + high5 + "°C");
+                txtFutWeather5.setText(weather5.getType());
+                txtFutFeng5.setText(weather5.getFengli());
+                imgFutWeather5.setImageResource(getRightImg(weather5.getType()));
+
+
+                TodayWeather weather6 = weatherList.get(5);
+                String week6 = weather6.getDate().substring(3);
+                txtFutWeek6.setText(week6);
+                String low6 = weather6.getLow();
+                low6 = low6.substring(3, low6.length() - 1);
+                String high6 = weather6.getHigh();
+                high6 = high6.substring(3, high6.length() - 1);
+                txtFutTem6.setText(low6 + "~" + high6 + "°C");
+                txtFutWeather6.setText(weather6.getType());
+                txtFutFeng6.setText(weather6.getFengli());
+                imgFutWeather6.setImageResource(getRightImg(weather6.getType()));
+            }
+        } catch (Exception e) {
+            Log.e(log_tag, e.toString());
         }
     }
 
@@ -951,5 +955,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
         } else {
             return R.drawable.biz_plugin_weather_qing;
         }
+
     }
 }
