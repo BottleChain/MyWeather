@@ -98,13 +98,18 @@ public class WelcomeGuideActivity extends AppCompatActivity {
     //初始化ViewPager的方法
     public void initViewPager() {
         ImageView iv1 = new ImageView(this);
-        iv1.setImageResource(R.mipmap.welcome1);
+        iv1.setScaleType(ImageView.ScaleType.MATRIX);
+        iv1.setImageResource(R.drawable.welcome1);
+
         ImageView iv2 = new ImageView(this);
-         iv2.setImageResource(R.mipmap.welcome2);
+         iv2.setImageResource(R.drawable.welcome2);
+        iv1.setScaleType(ImageView.ScaleType.FIT_START);
         ImageView iv3 = new ImageView(this);
-        iv3.setImageResource(R.mipmap.welcome3);
+        iv3.setScaleType(ImageView.ScaleType.FIT_START);
+        iv3.setImageResource(R.drawable.welcome3);
         ImageView iv4 = new ImageView(this);
-        iv4.setImageResource(R.mipmap.welcome4);
+        iv4.setScaleType(ImageView.ScaleType.FIT_START);
+        iv4.setImageResource(R.drawable.welcome4);
         list.add(iv1);
         list.add(iv2);
         list.add(iv3);

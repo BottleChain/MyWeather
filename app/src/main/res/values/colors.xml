@@ -8,4 +8,5 @@
     <color name="defColor">@android:color/transparent</color>
     <color name="white">@android:color/transparent</color>
     <color name="item_click">#ff9900</color>
+    <color name="black">#000000</color>
 </resources>
